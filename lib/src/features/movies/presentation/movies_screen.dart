@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:movie_browser/src/common_widgets/error_message_widget.dart';
 import 'package:movie_browser/src/features/movies/presentation/movie_card.dart';
 import 'package:movie_browser/src/features/movies/presentation/movies_controller.dart';
 
@@ -47,7 +48,13 @@ class MoviesScreen extends ConsumerWidget {
           ),
         ),
         // Initial load failed
-        error: (err, stack) => Center(child: Text('Error occurred: $err')),
+        error: (err, stack) => ErrorMessageWidget(
+          errorMessage: err.toString(),
+          onRetry: () {
+            // reset old state and retrigger build function in Controller
+            ref.invalidate(popularMoviesControllerProvider);
+          },
+        ),
         // Initially loading (will be replaced with SkeletonView later)
         loading: () => ListView.builder(
           itemCount: 6,
