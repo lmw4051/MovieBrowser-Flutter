@@ -1,7 +1,5 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:movie_browser/src/features/movies/domain/movie.dart';
 import 'package:movie_browser/src/features/movies/presentation/movie_card.dart';
 import 'package:movie_browser/src/features/movies/presentation/movies_controller.dart';
 
@@ -23,14 +21,14 @@ class MoviesScreen extends ConsumerWidget {
                 notification.metrics.maxScrollExtent - 200) {
               ref
                   .read(popularMoviesControllerProvider.notifier)
-                  .fetchNextPage();
+                  .fetchNextPage()
+                  .ignore();
             }
             return false;
           },
           child: ListView.builder(
-            itemCount:
-                movies.length +
-                1, // +1 is to display the loading indicator at the bottom
+            itemCount: movies.length + 1,
+            // +1 is to display the loading indicator at the bottom
             itemBuilder: (context, index) {
               if (index < movies.length) {
                 return MovieCard(
@@ -38,11 +36,12 @@ class MoviesScreen extends ConsumerWidget {
                   onTap: () {},
                 );
               } else {
+                return const MovieCardSkeleton();
                 // Bottom loading indicator
-                return const Padding(
-                  padding: EdgeInsets.symmetric(vertical: 32),
-                  child: Center(child: CircularProgressIndicator()),
-                );
+                // return const Padding(
+                //   padding: EdgeInsets.symmetric(vertical: 32),
+                //   child: Center(child: CircularProgressIndicator()),
+                // );
               }
             },
           ),
@@ -50,7 +49,10 @@ class MoviesScreen extends ConsumerWidget {
         // Initial load failed
         error: (err, stack) => Center(child: Text('Error occurred: $err')),
         // Initially loading (will be replaced with SkeletonView later)
-        loading: () => const Center(child: CircularProgressIndicator()),
+        loading: () => ListView.builder(
+          itemCount: 6,
+          itemBuilder: (context, index) => const MovieCardSkeleton(),
+        ),
       ),
     );
   }
