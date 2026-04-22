@@ -159,7 +159,7 @@ class __$$TmdbMoviesResponseImplCopyWithImpl<$Res>
 /// @nodoc
 @JsonSerializable()
 class _$TmdbMoviesResponseImpl implements _TmdbMoviesResponse {
-  const _$TmdbMoviesResponseImpl({
+  _$TmdbMoviesResponseImpl({
     required this.page,
     required final List<Movie> results,
     @JsonKey(name: 'total_pages') required this.totalPages,
@@ -232,7 +232,7 @@ class _$TmdbMoviesResponseImpl implements _TmdbMoviesResponse {
 }
 
 abstract class _TmdbMoviesResponse implements TmdbMoviesResponse {
-  const factory _TmdbMoviesResponse({
+  factory _TmdbMoviesResponse({
     required final int page,
     required final List<Movie> results,
     @JsonKey(name: 'total_pages') required final int totalPages,

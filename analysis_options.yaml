@@ -13,3 +13,5 @@ analyzer:
 
     # Downgrade or disable certain rules (fine-tune based on team preferences)
     public_member_api_docs: ignore # Can be disabled if you don't want to enforce documentation for every public member
+  enable-experiment:
+    - dot-shorthands
