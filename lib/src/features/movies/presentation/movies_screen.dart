@@ -15,39 +15,39 @@ class MoviesScreen extends ConsumerWidget {
     return Scaffold(
       appBar: AppBar(title: const Text('Popular Movies')),
       body: moviesAsync.when(
-        data: (movies) => NotificationListener<ScrollNotification>(
-          onNotification: (notification) {
-            // Trigger load more when scrolling
-            // close to the bottom (200 pixels remaining)
-            if (notification.metrics.pixels >=
-                notification.metrics.maxScrollExtent - 200) {
-              ref
-                  .read(popularMoviesControllerProvider.notifier)
-                  .fetchNextPage()
-                  .ignore();
-            }
-            return false;
-          },
-          child: ListView.builder(
-            itemCount: movies.length + 1,
-            // +1 is to display the loading indicator at the bottom
-            itemBuilder: (context, index) {
-              if (index < movies.length) {
-                return MovieCard(
-                  movie: movies[index],
-                  onTap: () async {
-                    await context.push('/movie/${movies[index].id}');
-                  },
-                );
-              } else {
-                return const MovieCardSkeleton();
-                // Bottom loading indicator
-                // return const Padding(
-                //   padding: EdgeInsets.symmetric(vertical: 32),
-                //   child: Center(child: CircularProgressIndicator()),
-                // );
+        skipLoadingOnRefresh: false,
+        data: (movies) => RefreshIndicator(
+          onRefresh: () => ref.refresh(popularMoviesControllerProvider.future),
+          child: NotificationListener<ScrollNotification>(
+            onNotification: (notification) {
+              // Trigger load more when scrolling
+              // close to the bottom (200 pixels remaining)
+              if (notification.metrics.pixels >=
+                  notification.metrics.maxScrollExtent - 200) {
+                ref
+                    .read(popularMoviesControllerProvider.notifier)
+                    .fetchNextPage()
+                    .ignore();
               }
+              return false;
             },
+            child: ListView.builder(
+              physics: const AlwaysScrollableScrollPhysics(),
+              itemCount: movies.length + 1,
+              // +1 is to display the loading indicator at the bottom
+              itemBuilder: (context, index) {
+                if (index < movies.length) {
+                  return MovieCard(
+                    movie: movies[index],
+                    onTap: () async {
+                      await context.push('/movie/${movies[index].id}');
+                    },
+                  );
+                } else {
+                  return const MovieCardSkeleton();
+                }
+              },
+            ),
           ),
         ),
         // Initial load failed
