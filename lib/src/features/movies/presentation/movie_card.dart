@@ -1,5 +1,6 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:movie_browser/src/common_widgets/shimmer_placeholder.dart';
 import 'package:movie_browser/src/features/movies/domain/movie.dart';
 import 'package:shimmer/shimmer.dart';
 
@@ -92,15 +93,73 @@ class _PosterImage extends StatelessWidget {
   }
 }
 
-class ShimmerPlaceholder extends StatelessWidget {
-  const ShimmerPlaceholder({super.key});
+class MovieCardSkeleton extends StatelessWidget {
+  const MovieCardSkeleton({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Shimmer.fromColors(
-      baseColor: Colors.grey[800]!,
-      highlightColor: Colors.grey[700]!,
-      child: Container(color: Colors.black),
+    return Card(
+      clipBehavior: Clip.antiAlias,
+      margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      elevation: 4,
+      child: const Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // 1. Left Poster Skeleton View
+          SizedBox(
+            width: 100,
+            height: 150,
+            child: ShimmerPlaceholder(),
+          ),
+
+          // 2. Right Side Text Info Skeleton View
+          Expanded(
+            child: Padding(
+              padding: EdgeInsets.all(12),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Title Skeleton View
+                  SizedBox(
+                    height: 20,
+                    width: double.infinity,
+                    child: ShimmerPlaceholder(),
+                  ),
+                  SizedBox(height: 8),
+
+                  // Date Skeleton View
+                  SizedBox(
+                    height: 14,
+                    width: 100,
+                    child: ShimmerPlaceholder(),
+                  ),
+                  SizedBox(height: 16),
+
+                  // Description Skeleton View
+                  SizedBox(
+                    height: 14,
+                    width: double.infinity,
+                    child: ShimmerPlaceholder(),
+                  ),
+                  SizedBox(height: 4),
+                  SizedBox(
+                    height: 14,
+                    width: double.infinity,
+                    child: ShimmerPlaceholder(),
+                  ),
+                  SizedBox(height: 4),
+                  SizedBox(
+                    height: 14,
+                    width: 150,
+                    child: ShimmerPlaceholder(),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
