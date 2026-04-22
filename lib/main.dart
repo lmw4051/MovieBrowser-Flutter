@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:movie_browser/src/features/movies/presentation/movies_screen.dart';
+import 'package:movie_browser/src/routing/app_router.dart';
 
 void main() {
   runApp(
@@ -10,12 +10,15 @@ void main() {
   );
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends ConsumerWidget {
   const MyApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
+  Widget build(BuildContext context, WidgetRef ref) {
+    final goRouter = ref.watch(goRouterProvider);
+
+    return MaterialApp.router(
+      routerConfig: goRouter,
       title: 'Movie Browser',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
@@ -23,7 +26,6 @@ class MyApp extends StatelessWidget {
         colorSchemeSeed: Colors.deepPurple,
         brightness: Brightness.dark,
       ),
-      home: const MoviesScreen(),
     );
   }
 }

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:movie_browser/src/common_widgets/error_message_widget.dart';
 import 'package:movie_browser/src/features/movies/presentation/movie_card.dart';
 import 'package:movie_browser/src/features/movies/presentation/movies_controller.dart';
@@ -34,7 +35,9 @@ class MoviesScreen extends ConsumerWidget {
               if (index < movies.length) {
                 return MovieCard(
                   movie: movies[index],
-                  onTap: () {},
+                  onTap: () {
+                    context.go('/movie/${movies[index].id}');
+                  },
                 );
               } else {
                 return const MovieCardSkeleton();
