@@ -22,7 +22,7 @@ class MovieDetailScreen extends ConsumerWidget {
           slivers: [
             // 1. Collapsible parallax scrolling header (SliverAppBar)
             SliverAppBar(
-              expandedHeight: 300.0,
+              expandedHeight: 300,
               pinned: true, // Keep the AppBar at the top when scrolling down
               flexibleSpace: FlexibleSpaceBar(
                 title: Text(movie.title),
@@ -125,9 +125,109 @@ class MovieDetailScreen extends ConsumerWidget {
         ),
 
         // Loading state
-        loading: () => const Scaffold(
-          body: Center(child: CircularProgressIndicator()),
-        ),
+        loading: () => const _MovieDetailSkeleton(),
+        // loading: () => const Scaffold(
+        //   body: Center(child: CircularProgressIndicator()),
+        // ),
+      ),
+    );
+  }
+}
+
+class _MovieDetailSkeleton extends StatelessWidget {
+  const _MovieDetailSkeleton();
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: CustomScrollView(
+        physics:
+            const NeverScrollableScrollPhysics(), // Disable scrolling during loading
+        slivers: [
+          SliverAppBar(
+            expandedHeight: 300.0,
+            pinned: true,
+            // Ensure back button exists even in loading state
+            leading: IconButton(
+              icon: const Icon(Icons.arrow_back_ios_new, color: Colors.white),
+              onPressed: () {
+                if (Navigator.of(context).canPop()) {
+                  Navigator.of(context).pop();
+                }
+              },
+            ),
+            flexibleSpace: const FlexibleSpaceBar(
+              // Fill the entire header with shimmer
+              background: ShimmerPlaceholder(),
+            ),
+          ),
+
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Skeleton for Rating and Date
+                  Row(
+                    children: [
+                      Icon(Icons.star, color: Colors.grey[800], size: 24),
+                      const SizedBox(width: 8),
+                      const SizedBox(
+                        width: 40,
+                        height: 20,
+                        child: ShimmerPlaceholder(),
+                      ),
+                      const Spacer(),
+                      const SizedBox(
+                        width: 120,
+                        height: 20,
+                        child: ShimmerPlaceholder(),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 24),
+
+                  // Skeleton for Overview Title
+                  const SizedBox(
+                    width: 100,
+                    height: 28,
+                    child: ShimmerPlaceholder(),
+                  ),
+                  const SizedBox(height: 16),
+
+                  // Skeleton for Overview Paragraph (Multi-line)
+                  const SizedBox(
+                    width: double.infinity,
+                    height: 16,
+                    child: ShimmerPlaceholder(),
+                  ),
+                  const SizedBox(height: 12),
+                  const SizedBox(
+                    width: double.infinity,
+                    height: 16,
+                    child: ShimmerPlaceholder(),
+                  ),
+                  const SizedBox(height: 12),
+                  const SizedBox(
+                    width: double.infinity,
+                    height: 16,
+                    child: ShimmerPlaceholder(),
+                  ),
+                  const SizedBox(height: 12),
+                  // Last line slightly shorter for realism
+                  const FractionallySizedBox(
+                    widthFactor: 0.7,
+                    child: SizedBox(
+                      height: 16,
+                      child: ShimmerPlaceholder(),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
