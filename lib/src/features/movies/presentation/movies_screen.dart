@@ -35,8 +35,8 @@ class MoviesScreen extends ConsumerWidget {
               if (index < movies.length) {
                 return MovieCard(
                   movie: movies[index],
-                  onTap: () {
-                    context.go('/movie/${movies[index].id}');
+                  onTap: () async {
+                    await context.push('/movie/${movies[index].id}');
                   },
                 );
               } else {

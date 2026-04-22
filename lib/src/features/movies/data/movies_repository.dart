@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:movie_browser/src/features/movies/domain/movie.dart';
 import 'package:movie_browser/src/features/movies/domain/movie_exception.dart';
 import 'package:movie_browser/src/features/movies/domain/tmdb_movies_response.dart';
 import 'package:movie_browser/src/utils/dio_provider.dart';
@@ -45,6 +46,27 @@ class MoviesRepository {
       throw MovieException.unknown(e.toString());
     }
   }
+
+  Future<Movie> getMovie(int id) async {
+    try {
+      final response = await _dio.get<Map<String, dynamic>>('/movie/$id');
+      return Movie.fromJson(response.data!);
+    } on DioException catch (e) {
+      if (e.type == DioExceptionType.connectionTimeout ||
+          e.type == DioExceptionType.receiveTimeout ||
+          e.type == DioExceptionType.connectionError) {
+        throw const MovieException.noInternet();
+      }
+
+      if (e.response?.statusCode == 404) {
+        throw const MovieException.notFound();
+      }
+
+      throw const MovieException.serverError();
+    } catch (e) {
+      throw MovieException.unknown(e.toString());
+    }
+  }
 }
 
 // 4. Create a Riverpod Provider to be injected into the UI layer or other services
@@ -52,4 +74,10 @@ class MoviesRepository {
 MoviesRepository moviesRepository(MoviesRepositoryRef ref) {
   // Retrieve the previously configured Dio instance via ref.watch
   return MoviesRepository(ref.watch(dioProvider));
+}
+
+@riverpod
+Future<Movie> movieDetail(MovieDetailRef ref, int id) async {
+  final repository = ref.watch(moviesRepositoryProvider);
+  return repository.getMovie(id);
 }
