@@ -1,0 +1,68 @@
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:movie_browser/src/features/movies/domain/movie.dart';
+import 'package:movie_browser/src/features/movies/presentation/movies_controller.dart';
+
+class MoviesScreen extends ConsumerWidget {
+  const MoviesScreen({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final moviesAsync = ref.watch(popularMoviesControllerProvider);
+
+    return Scaffold(
+      appBar: AppBar(title: const Text('Popular Movies')),
+      body: moviesAsync.when(
+        data: (movies) => NotificationListener<ScrollNotification>(
+          onNotification: (notification) {
+            // Trigger load more when scrolling
+            // close to the bottom (200 pixels remaining)
+            if (notification.metrics.pixels >=
+                notification.metrics.maxScrollExtent - 200) {
+              ref
+                  .read(popularMoviesControllerProvider.notifier)
+                  .fetchNextPage();
+            }
+            return false;
+          },
+          child: ListView.builder(
+            itemCount:
+                movies.length +
+                1, // +1 is to display the loading indicator at the bottom
+            itemBuilder: (context, index) {
+              if (index < movies.length) {
+                final movie = movies[index];
+                return ListTile(
+                  leading: movie.posterImageUrl.isNotEmpty
+                      ? CachedNetworkImage(
+                          imageUrl: movie.posterImageUrl,
+                          width: 50,
+                          fit: BoxFit.cover,
+                          placeholder: (context, url) =>
+                              Container(color: Colors.grey[200]),
+                          errorWidget: (context, url, error) =>
+                              const Icon(Icons.error),
+                        )
+                      : const Icon(Icons.movie),
+                  title: Text(movie.title),
+                  subtitle: Text(movie.releaseDate ?? '未知日期'),
+                );
+              } else {
+                // Bottom loading indicator
+                return const Padding(
+                  padding: EdgeInsets.symmetric(vertical: 32),
+                  child: Center(child: CircularProgressIndicator()),
+                );
+              }
+            },
+          ),
+        ),
+        // Initial load failed
+        error: (err, stack) => Center(child: Text('Error occurred: $err')),
+        // Initially loading (will be replaced with SkeletonView later)
+        loading: () => const Center(child: CircularProgressIndicator()),
+      ),
+    );
+  }
+}

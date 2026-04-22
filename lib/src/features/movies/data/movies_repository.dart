@@ -1,5 +1,4 @@
 import 'package:dio/dio.dart';
-import 'package:flutter/material.dart';
 import 'package:movie_browser/src/features/movies/domain/movie_exception.dart';
 import 'package:movie_browser/src/features/movies/domain/tmdb_movies_response.dart';
 import 'package:movie_browser/src/utils/dio_provider.dart';
