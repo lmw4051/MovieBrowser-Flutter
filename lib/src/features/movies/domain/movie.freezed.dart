@@ -24,14 +24,16 @@ mixin _$Movie {
   int get id => throw _privateConstructorUsedError;
   String get title => throw _privateConstructorUsedError;
   String get overview => throw _privateConstructorUsedError;
+  @JsonKey(name: 'vote_average')
+  double get voteAverage => throw _privateConstructorUsedError;
   @JsonKey(name: 'poster_path')
   String? get posterPath => throw _privateConstructorUsedError;
   @JsonKey(name: 'backdrop_path')
   String? get backdropPath => throw _privateConstructorUsedError;
-  @JsonKey(name: 'vote_average')
-  double get voteAverage => throw _privateConstructorUsedError;
   @JsonKey(name: 'release_date')
   String? get releaseDate => throw _privateConstructorUsedError;
+  @JsonKey(readValue: _readCast)
+  List<Cast> get cast => throw _privateConstructorUsedError;
 
   /// Serializes this Movie to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
@@ -51,10 +53,11 @@ abstract class $MovieCopyWith<$Res> {
     int id,
     String title,
     String overview,
+    @JsonKey(name: 'vote_average') double voteAverage,
     @JsonKey(name: 'poster_path') String? posterPath,
     @JsonKey(name: 'backdrop_path') String? backdropPath,
-    @JsonKey(name: 'vote_average') double voteAverage,
     @JsonKey(name: 'release_date') String? releaseDate,
+    @JsonKey(readValue: _readCast) List<Cast> cast,
   });
 }
 
@@ -76,10 +79,11 @@ class _$MovieCopyWithImpl<$Res, $Val extends Movie>
     Object? id = null,
     Object? title = null,
     Object? overview = null,
+    Object? voteAverage = null,
     Object? posterPath = freezed,
     Object? backdropPath = freezed,
-    Object? voteAverage = null,
     Object? releaseDate = freezed,
+    Object? cast = null,
   }) {
     return _then(
       _value.copyWith(
@@ -95,6 +99,10 @@ class _$MovieCopyWithImpl<$Res, $Val extends Movie>
                 ? _value.overview
                 : overview // ignore: cast_nullable_to_non_nullable
                       as String,
+            voteAverage: null == voteAverage
+                ? _value.voteAverage
+                : voteAverage // ignore: cast_nullable_to_non_nullable
+                      as double,
             posterPath: freezed == posterPath
                 ? _value.posterPath
                 : posterPath // ignore: cast_nullable_to_non_nullable
@@ -103,14 +111,14 @@ class _$MovieCopyWithImpl<$Res, $Val extends Movie>
                 ? _value.backdropPath
                 : backdropPath // ignore: cast_nullable_to_non_nullable
                       as String?,
-            voteAverage: null == voteAverage
-                ? _value.voteAverage
-                : voteAverage // ignore: cast_nullable_to_non_nullable
-                      as double,
             releaseDate: freezed == releaseDate
                 ? _value.releaseDate
                 : releaseDate // ignore: cast_nullable_to_non_nullable
                       as String?,
+            cast: null == cast
+                ? _value.cast
+                : cast // ignore: cast_nullable_to_non_nullable
+                      as List<Cast>,
           )
           as $Val,
     );
@@ -129,10 +137,11 @@ abstract class _$$MovieImplCopyWith<$Res> implements $MovieCopyWith<$Res> {
     int id,
     String title,
     String overview,
+    @JsonKey(name: 'vote_average') double voteAverage,
     @JsonKey(name: 'poster_path') String? posterPath,
     @JsonKey(name: 'backdrop_path') String? backdropPath,
-    @JsonKey(name: 'vote_average') double voteAverage,
     @JsonKey(name: 'release_date') String? releaseDate,
+    @JsonKey(readValue: _readCast) List<Cast> cast,
   });
 }
 
@@ -153,10 +162,11 @@ class __$$MovieImplCopyWithImpl<$Res>
     Object? id = null,
     Object? title = null,
     Object? overview = null,
+    Object? voteAverage = null,
     Object? posterPath = freezed,
     Object? backdropPath = freezed,
-    Object? voteAverage = null,
     Object? releaseDate = freezed,
+    Object? cast = null,
   }) {
     return _then(
       _$MovieImpl(
@@ -172,6 +182,10 @@ class __$$MovieImplCopyWithImpl<$Res>
             ? _value.overview
             : overview // ignore: cast_nullable_to_non_nullable
                   as String,
+        voteAverage: null == voteAverage
+            ? _value.voteAverage
+            : voteAverage // ignore: cast_nullable_to_non_nullable
+                  as double,
         posterPath: freezed == posterPath
             ? _value.posterPath
             : posterPath // ignore: cast_nullable_to_non_nullable
@@ -180,14 +194,14 @@ class __$$MovieImplCopyWithImpl<$Res>
             ? _value.backdropPath
             : backdropPath // ignore: cast_nullable_to_non_nullable
                   as String?,
-        voteAverage: null == voteAverage
-            ? _value.voteAverage
-            : voteAverage // ignore: cast_nullable_to_non_nullable
-                  as double,
         releaseDate: freezed == releaseDate
             ? _value.releaseDate
             : releaseDate // ignore: cast_nullable_to_non_nullable
                   as String?,
+        cast: null == cast
+            ? _value._cast
+            : cast // ignore: cast_nullable_to_non_nullable
+                  as List<Cast>,
       ),
     );
   }
@@ -200,11 +214,12 @@ class _$MovieImpl implements _Movie {
     required this.id,
     required this.title,
     required this.overview,
+    @JsonKey(name: 'vote_average') required this.voteAverage,
     @JsonKey(name: 'poster_path') this.posterPath,
     @JsonKey(name: 'backdrop_path') this.backdropPath,
-    @JsonKey(name: 'vote_average') required this.voteAverage,
     @JsonKey(name: 'release_date') this.releaseDate,
-  });
+    @JsonKey(readValue: _readCast) final List<Cast> cast = const [],
+  }) : _cast = cast;
 
   factory _$MovieImpl.fromJson(Map<String, dynamic> json) =>
       _$$MovieImplFromJson(json);
@@ -216,21 +231,29 @@ class _$MovieImpl implements _Movie {
   @override
   final String overview;
   @override
+  @JsonKey(name: 'vote_average')
+  final double voteAverage;
+  @override
   @JsonKey(name: 'poster_path')
   final String? posterPath;
   @override
   @JsonKey(name: 'backdrop_path')
   final String? backdropPath;
   @override
-  @JsonKey(name: 'vote_average')
-  final double voteAverage;
-  @override
   @JsonKey(name: 'release_date')
   final String? releaseDate;
+  final List<Cast> _cast;
+  @override
+  @JsonKey(readValue: _readCast)
+  List<Cast> get cast {
+    if (_cast is EqualUnmodifiableListView) return _cast;
+    // ignore: implicit_dynamic_type
+    return EqualUnmodifiableListView(_cast);
+  }
 
   @override
   String toString() {
-    return 'Movie(id: $id, title: $title, overview: $overview, posterPath: $posterPath, backdropPath: $backdropPath, voteAverage: $voteAverage, releaseDate: $releaseDate)';
+    return 'Movie(id: $id, title: $title, overview: $overview, voteAverage: $voteAverage, posterPath: $posterPath, backdropPath: $backdropPath, releaseDate: $releaseDate, cast: $cast)';
   }
 
   @override
@@ -242,14 +265,15 @@ class _$MovieImpl implements _Movie {
             (identical(other.title, title) || other.title == title) &&
             (identical(other.overview, overview) ||
                 other.overview == overview) &&
+            (identical(other.voteAverage, voteAverage) ||
+                other.voteAverage == voteAverage) &&
             (identical(other.posterPath, posterPath) ||
                 other.posterPath == posterPath) &&
             (identical(other.backdropPath, backdropPath) ||
                 other.backdropPath == backdropPath) &&
-            (identical(other.voteAverage, voteAverage) ||
-                other.voteAverage == voteAverage) &&
             (identical(other.releaseDate, releaseDate) ||
-                other.releaseDate == releaseDate));
+                other.releaseDate == releaseDate) &&
+            const DeepCollectionEquality().equals(other._cast, _cast));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
@@ -259,10 +283,11 @@ class _$MovieImpl implements _Movie {
     id,
     title,
     overview,
+    voteAverage,
     posterPath,
     backdropPath,
-    voteAverage,
     releaseDate,
+    const DeepCollectionEquality().hash(_cast),
   );
 
   /// Create a copy of Movie
@@ -284,10 +309,11 @@ abstract class _Movie implements Movie {
     required final int id,
     required final String title,
     required final String overview,
+    @JsonKey(name: 'vote_average') required final double voteAverage,
     @JsonKey(name: 'poster_path') final String? posterPath,
     @JsonKey(name: 'backdrop_path') final String? backdropPath,
-    @JsonKey(name: 'vote_average') required final double voteAverage,
     @JsonKey(name: 'release_date') final String? releaseDate,
+    @JsonKey(readValue: _readCast) final List<Cast> cast,
   }) = _$MovieImpl;
 
   factory _Movie.fromJson(Map<String, dynamic> json) = _$MovieImpl.fromJson;
@@ -299,17 +325,20 @@ abstract class _Movie implements Movie {
   @override
   String get overview;
   @override
+  @JsonKey(name: 'vote_average')
+  double get voteAverage;
+  @override
   @JsonKey(name: 'poster_path')
   String? get posterPath;
   @override
   @JsonKey(name: 'backdrop_path')
   String? get backdropPath;
   @override
-  @JsonKey(name: 'vote_average')
-  double get voteAverage;
-  @override
   @JsonKey(name: 'release_date')
   String? get releaseDate;
+  @override
+  @JsonKey(readValue: _readCast)
+  List<Cast> get cast;
 
   /// Create a copy of Movie
   /// with the given fields replaced by the non-null parameter values.
