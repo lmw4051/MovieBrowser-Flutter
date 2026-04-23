@@ -13,42 +13,58 @@ class MovieDetailScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // Pass in movieId to listen to the state of this specific movie
     final movieAsync = ref.watch(movieDetailProvider(movieId));
+    final theme = Theme.of(context);
 
     return Scaffold(
       body: movieAsync.when(
         data: (movie) => CustomScrollView(
           slivers: [
-            // 1. Collapsible parallax scrolling header (SliverAppBar)
+            // --- 1. Top Parallax Header ---
             SliverAppBar(
-              expandedHeight: 300,
-              pinned: true, // Keep the AppBar at the top when scrolling down
+              expandedHeight:
+                  350, // Increased height for a more impactful hero image
+              pinned: true,
+              stretch:
+                  true, // Allows stretching for a pull-to-refresh bounce effect
+              backgroundColor: theme.scaffoldBackgroundColor,
               flexibleSpace: FlexibleSpaceBar(
-                title: Text(movie.title),
+                title: Text(
+                  movie.title,
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    shadows: [
+                      Shadow(
+                        color: Colors.black87,
+                        blurRadius: 10,
+                        offset: Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                ),
                 background: Stack(
                   fit: StackFit.expand,
                   children: [
-                    // Large background image of the movie
                     if (movie.backdropImageUrl.isNotEmpty)
                       CachedNetworkImage(
                         imageUrl: movie.backdropImageUrl,
                         fit: BoxFit.cover,
                         placeholder: (context, url) =>
                             const ShimmerPlaceholder(),
-                        errorWidget: (context, url, error) =>
-                            const Icon(Icons.error),
                       ),
-                    // Add a black gradient to make the white title text clearer
+                    // Dual Gradient: Darkens the bottom to make text pop,
+                    // darkens the top for back button visibility
                     const DecoratedBox(
                       decoration: BoxDecoration(
                         gradient: LinearGradient(
                           begin: Alignment.bottomCenter,
                           end: Alignment.topCenter,
                           colors: [
-                            Colors.black87,
+                            Colors.black,
                             Colors.transparent,
+                            Colors.black45,
                           ],
+                          stops: [0.0, 0.5, 1.0],
                         ),
                       ),
                     ),
@@ -57,56 +73,142 @@ class MovieDetailScreen extends ConsumerWidget {
               ),
             ),
 
-            // 2. Content area (SliverToBoxAdapter)
+            // --- 2. Refined Content Section ---
             SliverToBoxAdapter(
               child: Padding(
-                padding: const EdgeInsets.all(16),
+                padding: const EdgeInsets.all(20),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Rating and date
+                    // [Information Capsules] Rating and Date
                     Row(
                       children: [
-                        const Icon(Icons.star, color: Colors.amber, size: 24),
-                        const SizedBox(width: 8),
-                        Text(
-                          movie.voteAverage.toStringAsFixed(1),
-                          style: Theme.of(context).textTheme.titleMedium,
+                        _buildInfoChip(
+                          context,
+                          icon: Icons.star_rounded,
+                          iconColor: Colors.amber,
+                          text: '${movie.voteAverage.toStringAsFixed(1)} / 10',
                         ),
-                        const Spacer(),
-                        Text(
-                          'Release Date: ${movie.releaseDate ?? 'Unknown'}',
-                          style: Theme.of(context).textTheme.bodyMedium
-                              ?.copyWith(
-                                color: Colors.grey[400],
-                              ),
+                        const SizedBox(width: 12),
+                        _buildInfoChip(
+                          context,
+                          icon: Icons.calendar_today_rounded,
+                          text: movie.releaseDate ?? 'Unknown',
                         ),
                       ],
                     ),
                     const SizedBox(height: 24),
 
-                    // Overview title
+                    // [Primary Action Buttons] Trailer and Bookmark
+                    Row(
+                      children: [
+                        Expanded(
+                          child: FilledButton.icon(
+                            onPressed: () {
+                              // TODO: Trailer playback logic
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text('Preparing to play trailer...'),
+                                ),
+                              );
+                            },
+                            style: FilledButton.styleFrom(
+                              padding: const EdgeInsets.symmetric(vertical: 16),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                            ),
+                            icon: const Icon(Icons.play_arrow_rounded),
+                            label: const Text(
+                              'Watch Trailer',
+                              style: TextStyle(fontSize: 16),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 16),
+                        IconButton.filledTonal(
+                          onPressed: () {
+                            // TODO: Bookmark logic
+                          },
+                          icon: const Icon(Icons.bookmark_border_rounded),
+                          style: IconButton.styleFrom(
+                            padding: const EdgeInsets.all(16),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 32),
+
+                    // [Synopsis]
                     Text(
-                      'Overview',
-                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                      'Synopsis',
+                      style: theme.textTheme.titleLarge?.copyWith(
                         fontWeight: FontWeight.bold,
                       ),
                     ),
                     const SizedBox(height: 12),
-
-                    // Overview content
                     Text(
                       movie.overview.isNotEmpty
                           ? movie.overview
-                          : 'There is no overview available for this movie.',
-                      style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                        height:
-                            1.5, // Increase line height for more comfortable reading
+                          : 'No synopsis available for this movie.',
+                      style: theme.textTheme.bodyLarge?.copyWith(
+                        height: 1.6,
+                        color: Colors.grey[300],
+                        letterSpacing: 0.5,
+                      ),
+                    ),
+                    const SizedBox(height: 32),
+
+                    // [UI Placeholder] Cast (Ready for API integration)
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          'Main Cast',
+                          style: theme.textTheme.titleLarge?.copyWith(
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        TextButton(
+                          onPressed: () {},
+                          child: const Text('View All'),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 12),
+                    // Horizontal scrolling skeleton preview
+                    SizedBox(
+                      height: 140,
+                      child: ListView.separated(
+                        scrollDirection: Axis.horizontal,
+                        itemCount: 5,
+                        separatorBuilder: (_, __) => const SizedBox(width: 16),
+                        itemBuilder: (context, index) => Column(
+                          children: [
+                            const CircleAvatar(
+                              radius: 40,
+                              backgroundColor: Colors.black26,
+                              child: Icon(
+                                Icons.person,
+                                color: Colors.grey,
+                                size: 40,
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            Container(
+                              width: 60,
+                              height: 12,
+                              color: Colors.grey[800],
+                            ),
+                          ],
+                        ),
                       ),
                     ),
 
-                    // Bottom padding
-                    const SizedBox(height: 100),
+                    const SizedBox(height: 100), // Bottom spacing
                   ],
                 ),
               ),
@@ -114,118 +216,46 @@ class MovieDetailScreen extends ConsumerWidget {
           ],
         ),
 
-        // Error state
         error: (err, stack) => Scaffold(
-          appBar:
-              AppBar(), // Provide a default AppBar so the user can navigate back
+          appBar: AppBar(),
           body: ErrorMessageWidget(
             errorMessage: err.toString(),
             onRetry: () => ref.invalidate(movieDetailProvider(movieId)),
           ),
         ),
-
-        // Loading state
-        loading: () => const _MovieDetailSkeleton(),
-        // loading: () => const Scaffold(
-        //   body: Center(child: CircularProgressIndicator()),
-        // ),
+        loading: () => const Scaffold(
+          body: Center(child: CircularProgressIndicator()),
+        ),
       ),
     );
   }
-}
 
-class _MovieDetailSkeleton extends StatelessWidget {
-  const _MovieDetailSkeleton();
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: CustomScrollView(
-        physics:
-            const NeverScrollableScrollPhysics(), // Disable scrolling during loading
-        slivers: [
-          SliverAppBar(
-            expandedHeight: 300.0,
-            pinned: true,
-            // Ensure back button exists even in loading state
-            leading: IconButton(
-              icon: const Icon(Icons.arrow_back_ios_new, color: Colors.white),
-              onPressed: () {
-                if (Navigator.of(context).canPop()) {
-                  Navigator.of(context).pop();
-                }
-              },
-            ),
-            flexibleSpace: const FlexibleSpaceBar(
-              // Fill the entire header with shimmer
-              background: ShimmerPlaceholder(),
-            ),
-          ),
-
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Skeleton for Rating and Date
-                  Row(
-                    children: [
-                      Icon(Icons.star, color: Colors.grey[800], size: 24),
-                      const SizedBox(width: 8),
-                      const SizedBox(
-                        width: 40,
-                        height: 20,
-                        child: ShimmerPlaceholder(),
-                      ),
-                      const Spacer(),
-                      const SizedBox(
-                        width: 120,
-                        height: 20,
-                        child: ShimmerPlaceholder(),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 24),
-
-                  // Skeleton for Overview Title
-                  const SizedBox(
-                    width: 100,
-                    height: 28,
-                    child: ShimmerPlaceholder(),
-                  ),
-                  const SizedBox(height: 16),
-
-                  // Skeleton for Overview Paragraph (Multi-line)
-                  const SizedBox(
-                    width: double.infinity,
-                    height: 16,
-                    child: ShimmerPlaceholder(),
-                  ),
-                  const SizedBox(height: 12),
-                  const SizedBox(
-                    width: double.infinity,
-                    height: 16,
-                    child: ShimmerPlaceholder(),
-                  ),
-                  const SizedBox(height: 12),
-                  const SizedBox(
-                    width: double.infinity,
-                    height: 16,
-                    child: ShimmerPlaceholder(),
-                  ),
-                  const SizedBox(height: 12),
-                  // Last line slightly shorter for realism
-                  const FractionallySizedBox(
-                    widthFactor: 0.7,
-                    child: SizedBox(
-                      height: 16,
-                      child: ShimmerPlaceholder(),
-                    ),
-                  ),
-                ],
-              ),
-            ),
+  // Independent Info Capsule UI Component
+  Widget _buildInfoChip(
+    BuildContext context, {
+    required IconData icon,
+    required String text,
+    Color? iconColor,
+  }) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      decoration: BoxDecoration(
+        color: Theme.of(
+          context,
+        ).colorScheme.surfaceContainerHighest.withOpacity(0.5),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: Colors.white10),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 18, color: iconColor ?? Colors.grey[400]),
+          const SizedBox(width: 6),
+          Text(
+            text,
+            style: Theme.of(
+              context,
+            ).textTheme.labelLarge?.copyWith(fontWeight: FontWeight.w600),
           ),
         ],
       ),
