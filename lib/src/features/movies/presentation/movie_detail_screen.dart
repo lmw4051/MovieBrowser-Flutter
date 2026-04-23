@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:movie_browser/src/common_widgets/error_message_widget.dart';
 import 'package:movie_browser/src/common_widgets/shimmer_placeholder.dart';
 import 'package:movie_browser/src/features/movies/data/movies_repository.dart';
+import 'package:movie_browser/src/features/movies/domain/cast.dart';
 import 'package:movie_browser/src/features/movies/domain/movie.dart';
 
 // Changed to ConsumerWidget to read Riverpod state
@@ -178,34 +179,80 @@ class MovieDetailScreen extends ConsumerWidget {
                         ),
                       ],
                     ),
-                    const SizedBox(height: 12),
+                    const SizedBox(height: 16),
                     // Horizontal scrolling skeleton preview
                     SizedBox(
-                      height: 140,
-                      child: ListView.separated(
-                        scrollDirection: Axis.horizontal,
-                        itemCount: 5,
-                        separatorBuilder: (_, __) => const SizedBox(width: 16),
-                        itemBuilder: (context, index) => Column(
-                          children: [
-                            const CircleAvatar(
-                              radius: 40,
-                              backgroundColor: Colors.black26,
-                              child: Icon(
-                                Icons.person,
-                                color: Colors.grey,
-                                size: 40,
-                              ),
+                      height: 160,
+                      child: movie.cast.isEmpty
+                          ? const Text('No Cast Info Available')
+                          : ListView.separated(
+                              scrollDirection: Axis.horizontal,
+                              itemCount: movie.cast.length,
+                              separatorBuilder: (context, index) =>
+                                  const SizedBox(
+                                    width: 16,
+                                  ),
+                              itemBuilder: (context, index) {
+                                final actor = movie.cast[index];
+                                return SizedBox(
+                                  width: 80,
+                                  child: Column(
+                                    children: [
+                                      CircleAvatar(
+                                        radius: 40,
+                                        backgroundColor: theme
+                                            .colorScheme
+                                            .surfaceContainerHighest,
+                                        backgroundImage:
+                                            actor.profileImageUrl.isNotEmpty
+                                            ? CachedNetworkImageProvider(
+                                                actor.profileImageUrl,
+                                              )
+                                            : null,
+                                        child: actor.profileImageUrl.isEmpty
+                                            ? const Icon(Icons.person, size: 40)
+                                            : null,
+                                      ),
+                                      const SizedBox(height: 8),
+                                      Text(
+                                        actor.name,
+                                        textAlign: TextAlign.center,
+                                        maxLines: 2,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: theme.textTheme.labelMedium
+                                            ?.copyWith(
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                      ),
+                                    ],
+                                  ),
+                                );
+                              },
                             ),
-                            const SizedBox(height: 8),
-                            Container(
-                              width: 60,
-                              height: 12,
-                              color: Colors.grey[800],
-                            ),
-                          ],
-                        ),
-                      ),
+                      // child: ListView.separated(
+                      //   scrollDirection: Axis.horizontal,
+                      //   itemCount: 5,
+                      //   separatorBuilder: (_, __) => const SizedBox(width: 16),
+                      //   itemBuilder: (context, index) => Column(
+                      //     children: [
+                      //       const CircleAvatar(
+                      //         radius: 40,
+                      //         backgroundColor: Colors.black26,
+                      //         child: Icon(
+                      //           Icons.person,
+                      //           color: Colors.grey,
+                      //           size: 40,
+                      //         ),
+                      //       ),
+                      //       const SizedBox(height: 8),
+                      //       Container(
+                      //         width: 60,
+                      //         height: 12,
+                      //         color: Colors.grey[800],
+                      //       ),
+                      //     ],
+                      //   ),
+                      // ),
                     ),
 
                     const SizedBox(height: 100), // Bottom spacing
