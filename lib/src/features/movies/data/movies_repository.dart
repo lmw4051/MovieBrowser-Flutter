@@ -49,7 +49,12 @@ class MoviesRepository {
 
   Future<Movie> getMovie(int id) async {
     try {
-      final response = await _dio.get<Map<String, dynamic>>('/movie/$id');
+      final response = await _dio.get<Map<String, dynamic>>(
+        '/movie/$id',
+        queryParameters: {
+          'append_to_response': 'credits',
+        },
+      );
       return Movie.fromJson(response.data!);
     } on DioException catch (e) {
       if (e.type == DioExceptionType.connectionTimeout ||
