@@ -2,7 +2,6 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:movie_browser/src/common_widgets/shimmer_placeholder.dart';
 import 'package:movie_browser/src/features/movies/domain/movie.dart';
-import 'package:shimmer/shimmer.dart';
 
 class MovieCard extends StatelessWidget {
   const MovieCard({

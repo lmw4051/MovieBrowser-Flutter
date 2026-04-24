@@ -3,7 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:movie_browser/src/common_widgets/error_message_widget.dart';
 import 'package:movie_browser/src/common_widgets/shimmer_placeholder.dart';
+import 'package:movie_browser/src/features/favorites/presentation/favorites_controller.dart';
 import 'package:movie_browser/src/features/movies/data/movies_repository.dart';
+import 'package:movie_browser/src/features/movies/domain/cast.dart';
 import 'package:movie_browser/src/features/movies/domain/movie.dart';
 
 // Changed to ConsumerWidget to read Riverpod state
@@ -13,99 +15,26 @@ class MovieDetailScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // Pass in movieId to listen to the state of this specific movie
     final movieAsync = ref.watch(movieDetailProvider(movieId));
 
     return Scaffold(
       body: movieAsync.when(
         data: (movie) => CustomScrollView(
           slivers: [
-            // 1. Collapsible parallax scrolling header (SliverAppBar)
-            SliverAppBar(
-              expandedHeight: 300,
-              pinned: true, // Keep the AppBar at the top when scrolling down
-              flexibleSpace: FlexibleSpaceBar(
-                title: Text(movie.title),
-                background: Stack(
-                  fit: StackFit.expand,
-                  children: [
-                    // Large background image of the movie
-                    if (movie.backdropImageUrl.isNotEmpty)
-                      CachedNetworkImage(
-                        imageUrl: movie.backdropImageUrl,
-                        fit: BoxFit.cover,
-                        placeholder: (context, url) =>
-                            const ShimmerPlaceholder(),
-                        errorWidget: (context, url, error) =>
-                            const Icon(Icons.error),
-                      ),
-                    // Add a black gradient to make the white title text clearer
-                    const DecoratedBox(
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          begin: Alignment.bottomCenter,
-                          end: Alignment.topCenter,
-                          colors: [
-                            Colors.black87,
-                            Colors.transparent,
-                          ],
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-
-            // 2. Content area (SliverToBoxAdapter)
+            _MovieDetailAppBar(movie: movie),
             SliverToBoxAdapter(
               child: Padding(
-                padding: const EdgeInsets.all(16),
+                padding: const EdgeInsets.all(20),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Rating and date
-                    Row(
-                      children: [
-                        const Icon(Icons.star, color: Colors.amber, size: 24),
-                        const SizedBox(width: 8),
-                        Text(
-                          movie.voteAverage.toStringAsFixed(1),
-                          style: Theme.of(context).textTheme.titleMedium,
-                        ),
-                        const Spacer(),
-                        Text(
-                          'Release Date: ${movie.releaseDate ?? 'Unknown'}',
-                          style: Theme.of(context).textTheme.bodyMedium
-                              ?.copyWith(
-                                color: Colors.grey[400],
-                              ),
-                        ),
-                      ],
-                    ),
+                    _MovieInfoSection(movie: movie),
                     const SizedBox(height: 24),
-
-                    // Overview title
-                    Text(
-                      'Overview',
-                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-
-                    // Overview content
-                    Text(
-                      movie.overview.isNotEmpty
-                          ? movie.overview
-                          : 'There is no overview available for this movie.',
-                      style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                        height:
-                            1.5, // Increase line height for more comfortable reading
-                      ),
-                    ),
-
-                    // Bottom padding
+                    _MovieActionButtons(movie: movie),
+                    const SizedBox(height: 32),
+                    _MovieSynopsis(overview: movie.overview),
+                    const SizedBox(height: 32),
+                    _MovieCastSection(cast: movie.cast),
                     const SizedBox(height: 100),
                   ],
                 ),
@@ -113,118 +42,287 @@ class MovieDetailScreen extends ConsumerWidget {
             ),
           ],
         ),
-
-        // Error state
         error: (err, stack) => Scaffold(
-          appBar:
-              AppBar(), // Provide a default AppBar so the user can navigate back
+          appBar: AppBar(),
           body: ErrorMessageWidget(
             errorMessage: err.toString(),
             onRetry: () => ref.invalidate(movieDetailProvider(movieId)),
           ),
         ),
-
-        // Loading state
-        loading: () => const _MovieDetailSkeleton(),
-        // loading: () => const Scaffold(
-        //   body: Center(child: CircularProgressIndicator()),
-        // ),
+        loading: () => const Scaffold(
+          body: Center(child: CircularProgressIndicator()),
+        ),
       ),
     );
   }
 }
 
-class _MovieDetailSkeleton extends StatelessWidget {
-  const _MovieDetailSkeleton();
+class _MovieDetailAppBar extends StatelessWidget {
+  const _MovieDetailAppBar({required this.movie});
+  final Movie movie;
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: CustomScrollView(
-        physics:
-            const NeverScrollableScrollPhysics(), // Disable scrolling during loading
-        slivers: [
-          SliverAppBar(
-            expandedHeight: 300.0,
-            pinned: true,
-            // Ensure back button exists even in loading state
-            leading: IconButton(
-              icon: const Icon(Icons.arrow_back_ios_new, color: Colors.white),
-              onPressed: () {
-                if (Navigator.of(context).canPop()) {
-                  Navigator.of(context).pop();
-                }
-              },
+    final theme = Theme.of(context);
+    return SliverAppBar(
+      expandedHeight: 350,
+      pinned: true,
+      stretch: true,
+      backgroundColor: theme.scaffoldBackgroundColor,
+      flexibleSpace: FlexibleSpaceBar(
+        title: Text(
+          movie.title,
+          style: const TextStyle(
+            fontWeight: FontWeight.bold,
+            shadows: [
+              Shadow(
+                color: Colors.black87,
+                blurRadius: 10,
+                offset: Offset(0, 2),
+              ),
+            ],
+          ),
+        ),
+        background: Stack(
+          fit: StackFit.expand,
+          children: [
+            if (movie.backdropImageUrl.isNotEmpty)
+              CachedNetworkImage(
+                imageUrl: movie.backdropImageUrl,
+                fit: BoxFit.cover,
+                placeholder: (context, url) => const ShimmerPlaceholder(),
+              ),
+            const DecoratedBox(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.bottomCenter,
+                  end: Alignment.topCenter,
+                  colors: [Colors.black, Colors.transparent, Colors.black45],
+                  stops: [0.0, 0.5, 1.0],
+                ),
+              ),
             ),
-            flexibleSpace: const FlexibleSpaceBar(
-              // Fill the entire header with shimmer
-              background: ShimmerPlaceholder(),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _MovieInfoSection extends StatelessWidget {
+  const _MovieInfoSection({required this.movie});
+  final Movie movie;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        _InfoChip(
+          icon: Icons.star_rounded,
+          iconColor: Colors.amber,
+          text: '${movie.voteAverage.toStringAsFixed(1)} / 10',
+        ),
+        const SizedBox(width: 12),
+        _InfoChip(
+          icon: Icons.calendar_today_rounded,
+          text: movie.releaseDate ?? 'Unknown',
+        ),
+      ],
+    );
+  }
+}
+
+class _MovieActionButtons extends ConsumerWidget {
+  const _MovieActionButtons({required this.movie});
+  final Movie movie;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final theme = Theme.of(context);
+    final favorites = ref.watch(favoritesControllerProvider);
+    final isFav = favorites.any((f) => f.id == movie.id);
+
+    return Row(
+      children: [
+        Expanded(
+          child: FilledButton.icon(
+            onPressed: () {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('Preparing to play trailer...')),
+              );
+            },
+            style: FilledButton.styleFrom(
+              padding: const EdgeInsets.symmetric(vertical: 16),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
+            icon: const Icon(Icons.play_arrow_rounded),
+            label: const Text('Watch Trailer', style: TextStyle(fontSize: 16)),
+          ),
+        ),
+        const SizedBox(width: 16),
+        IconButton.filledTonal(
+          onPressed: () {
+            ref
+                .read(favoritesControllerProvider.notifier)
+                .toggleFavorite(movie);
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(
+                  isFav ? 'Removed from favorites' : 'Added to favorites',
+                ),
+                duration: const Duration(seconds: 1),
+              ),
+            );
+          },
+          icon: Icon(
+            isFav ? Icons.bookmark_rounded : Icons.bookmark_border_rounded,
+            color: isFav ? theme.colorScheme.primary : null,
+          ),
+          style: IconButton.styleFrom(
+            padding: const EdgeInsets.all(16),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
             ),
           ),
+        ),
+      ],
+    );
+  }
+}
 
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Skeleton for Rating and Date
-                  Row(
-                    children: [
-                      Icon(Icons.star, color: Colors.grey[800], size: 24),
-                      const SizedBox(width: 8),
-                      const SizedBox(
-                        width: 40,
-                        height: 20,
-                        child: ShimmerPlaceholder(),
-                      ),
-                      const Spacer(),
-                      const SizedBox(
-                        width: 120,
-                        height: 20,
-                        child: ShimmerPlaceholder(),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 24),
+class _MovieSynopsis extends StatelessWidget {
+  const _MovieSynopsis({required this.overview});
+  final String overview;
 
-                  // Skeleton for Overview Title
-                  const SizedBox(
-                    width: 100,
-                    height: 28,
-                    child: ShimmerPlaceholder(),
-                  ),
-                  const SizedBox(height: 16),
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Synopsis',
+          style: theme.textTheme.titleLarge?.copyWith(
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        const SizedBox(height: 12),
+        Text(
+          overview.isNotEmpty
+              ? overview
+              : 'No synopsis available for this movie.',
+          style: theme.textTheme.bodyLarge?.copyWith(
+            height: 1.6,
+            color: Colors.grey[300],
+            letterSpacing: 0.5,
+          ),
+        ),
+      ],
+    );
+  }
+}
 
-                  // Skeleton for Overview Paragraph (Multi-line)
-                  const SizedBox(
-                    width: double.infinity,
-                    height: 16,
-                    child: ShimmerPlaceholder(),
-                  ),
-                  const SizedBox(height: 12),
-                  const SizedBox(
-                    width: double.infinity,
-                    height: 16,
-                    child: ShimmerPlaceholder(),
-                  ),
-                  const SizedBox(height: 12),
-                  const SizedBox(
-                    width: double.infinity,
-                    height: 16,
-                    child: ShimmerPlaceholder(),
-                  ),
-                  const SizedBox(height: 12),
-                  // Last line slightly shorter for realism
-                  const FractionallySizedBox(
-                    widthFactor: 0.7,
-                    child: SizedBox(
-                      height: 16,
-                      child: ShimmerPlaceholder(),
-                    ),
-                  ),
-                ],
+class _MovieCastSection extends StatelessWidget {
+  const _MovieCastSection({required this.cast});
+  final List<Cast> cast;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              'Main Cast',
+              style: theme.textTheme.titleLarge?.copyWith(
+                fontWeight: FontWeight.bold,
               ),
+            ),
+            TextButton(
+              onPressed: () {},
+              child: const Text('View All'),
+            ),
+          ],
+        ),
+        const SizedBox(height: 16),
+        SizedBox(
+          height: 160,
+          child: cast.isEmpty
+              ? const Text('No Cast Info Available')
+              : ListView.separated(
+                  scrollDirection: Axis.horizontal,
+                  itemCount: cast.length,
+                  separatorBuilder: (_, __) => const SizedBox(width: 16),
+                  itemBuilder: (context, index) {
+                    final actor = cast[index];
+                    return SizedBox(
+                      width: 80,
+                      child: Column(
+                        children: [
+                          CircleAvatar(
+                            radius: 40,
+                            backgroundColor:
+                                theme.colorScheme.surfaceContainerHighest,
+                            backgroundImage: actor.profileImageUrl.isNotEmpty
+                                ? CachedNetworkImageProvider(
+                                    actor.profileImageUrl,
+                                  )
+                                : null,
+                            child: actor.profileImageUrl.isEmpty
+                                ? const Icon(Icons.person, size: 40)
+                                : null,
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            actor.name,
+                            textAlign: TextAlign.center,
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                            style: theme.textTheme.labelMedium?.copyWith(
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  },
+                ),
+        ),
+      ],
+    );
+  }
+}
+
+class _InfoChip extends StatelessWidget {
+  const _InfoChip({required this.icon, required this.text, this.iconColor});
+  final IconData icon;
+  final String text;
+  final Color? iconColor;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surfaceContainerHighest.withOpacity(0.5),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: Colors.white10),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 18, color: iconColor ?? Colors.grey[400]),
+          const SizedBox(width: 6),
+          Text(
+            text,
+            style: theme.textTheme.labelLarge?.copyWith(
+              fontWeight: FontWeight.w600,
             ),
           ),
         ],
