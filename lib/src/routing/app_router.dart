@@ -2,6 +2,7 @@ import 'package:go_router/go_router.dart';
 import 'package:movie_browser/src/features/favorites/presentation/favorites_screen.dart';
 import 'package:movie_browser/src/features/movies/presentation/movie_detail_screen.dart';
 import 'package:movie_browser/src/features/movies/presentation/movies_screen.dart';
+import 'package:movie_browser/src/features/search/presentation/search_screen.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'app_router.g.dart';
@@ -29,6 +30,11 @@ GoRouter goRouter(GoRouterRef ref) {
         path: '/favorites',
         name: 'favorites',
         builder: (context, state) => const FavoritesScreen(),
+      ),
+      GoRoute(
+        path: '/search',
+        name: 'search',
+        builder: (context, state) => const SearchScreen(),
       ),
     ],
   );

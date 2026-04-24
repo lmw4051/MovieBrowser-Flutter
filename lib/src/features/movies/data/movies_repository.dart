@@ -72,6 +72,22 @@ class MoviesRepository {
       throw MovieException.unknown(e.toString());
     }
   }
+
+  Future<TmdbMoviesResponse> searchMovies(String query) async {
+    try {
+      final response = await _dio.get<Map<String, dynamic>>(
+        '/search/movie',
+        queryParameters: {
+          'query': query,
+          'language': 'zh-TW',
+        },
+      );
+
+      return TmdbMoviesResponse.fromJson(response.data!);
+    } catch (e) {
+      rethrow;
+    }
+  }
 }
 
 // 4. Create a Riverpod Provider to be injected into the UI layer or other services
