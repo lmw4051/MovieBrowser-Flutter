@@ -45,8 +45,11 @@ class SearchScreen extends ConsumerWidget {
           );
         },
         error: (err, stack) => ErrorMessageWidget(errorMessage: err.toString()),
-        loading: () => const Center(
-          child: CircularProgressIndicator(),
+        loading: () => ListView.builder(
+          itemCount: 6,
+          itemBuilder: (context, index) {
+            return const MovieCardSkeleton();
+          },
         ),
       ),
     );

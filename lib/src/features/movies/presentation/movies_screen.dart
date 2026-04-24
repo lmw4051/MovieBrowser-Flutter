@@ -17,6 +17,10 @@ class MoviesScreen extends ConsumerWidget {
         title: const Text('Popular Movies'),
         actions: [
           IconButton(
+            icon: const Icon(Icons.search_rounded),
+            onPressed: () => context.push('/search'),
+          ),
+          IconButton(
             icon: const Icon(Icons.bookmarks_rounded),
             tooltip: 'My Favorites',
             onPressed: () async {
