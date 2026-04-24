@@ -1,4 +1,5 @@
 import 'package:go_router/go_router.dart';
+import 'package:movie_browser/src/features/favorites/presentation/favorites_screen.dart';
 import 'package:movie_browser/src/features/movies/presentation/movie_detail_screen.dart';
 import 'package:movie_browser/src/features/movies/presentation/movies_screen.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
@@ -23,6 +24,11 @@ GoRouter goRouter(GoRouterRef ref) {
           final movieId = int.parse(state.pathParameters['id']!);
           return MovieDetailScreen(movieId: movieId);
         },
+      ),
+      GoRoute(
+        path: '/favorites',
+        name: 'favorites',
+        builder: (context, state) => const FavoritesScreen(),
       ),
     ],
   );

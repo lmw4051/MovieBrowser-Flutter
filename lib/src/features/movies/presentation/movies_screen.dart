@@ -13,7 +13,18 @@ class MoviesScreen extends ConsumerWidget {
     final moviesAsync = ref.watch(popularMoviesControllerProvider);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Popular Movies')),
+      appBar: AppBar(
+        title: const Text('Popular Movies'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.bookmarks_rounded),
+            tooltip: 'My Favorites',
+            onPressed: () async {
+              await context.push('/favorites');
+            },
+          ),
+        ],
+      ),
       body: moviesAsync.when(
         skipLoadingOnRefresh: false,
         data: (movies) => RefreshIndicator(
