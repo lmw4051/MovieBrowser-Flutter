@@ -12,8 +12,8 @@ Dio dio(DioRef ref) {
     BaseOptions(
       baseUrl: 'https://api.themoviedb.org/3',
       // Set reasonable timeouts to prevent the app from freezing on unstable networks
-      connectTimeout: const Duration(seconds: 10),
-      receiveTimeout: const Duration(seconds: 10),
+      connectTimeout: const Duration(seconds: 30),
+      receiveTimeout: const Duration(seconds: 30),
     ),
   );
 
